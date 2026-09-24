@@ -262,8 +262,50 @@ function analyzeMaze({ grid, rows, cols, startRoom }) {
 }
 
 /* =============================================================================
- * SECTION 5 — LAYOUT: grid positions -> pixels  (implemented in Task 9)
- * ============================================================================= */
+ * SECTION 5 — LAYOUT: grid positions -> pixels
+ * =============================================================================
+ * Rooms are square; walls are thinner (WALL_RATIO of a room).  colX[i] / rowY[i]
+ * give the pixel offset of grid column / row i from the maze's top-left corner,
+ * so drawing and the avatar share one piece of arithmetic.
+ */
+const PADDING = 20;      // pixels of breathing room around the maze
+const WALL_RATIO = 0.25; // wall thickness as a fraction of a room
+
+function tileSize(layout, index) {
+  return index % 2 === 0 ? layout.wallSize : layout.cellSize;
+}
+
+function computeLayout(rows, cols, width, height) {
+  const cellsWide = (cols - 1) / 2;
+  const cellsTall = (rows - 1) / 2;
+  const unitsX = cellsWide + (cellsWide + 1) * WALL_RATIO;
+  const unitsY = cellsTall + (cellsTall + 1) * WALL_RATIO;
+  const maxWidth = width - 2 * PADDING;
+  const maxHeight = height - 2 * PADDING;
+  let cellSize = Math.max(1, Math.floor(Math.min(maxWidth / unitsX, maxHeight / unitsY)));
+  let layout = buildLayout(rows, cols, cellSize);
+  // Walls are at least 1px, which can overshoot the budget on tiny canvases: shrink until it fits.
+  while (cellSize > 1 && (layout.totalWidth > maxWidth || layout.totalHeight > maxHeight)) {
+    cellSize -= 1;
+    layout = buildLayout(rows, cols, cellSize);
+  }
+  layout.originX = Math.floor((width - layout.totalWidth) / 2);
+  layout.originY = Math.floor((height - layout.totalHeight) / 2);
+  return layout;
+}
+
+// Pixel offsets for every grid column and row at a given room size.
+function buildLayout(rows, cols, cellSize) {
+  const wallSize = Math.max(1, Math.floor(cellSize * WALL_RATIO));
+  const layout = { cellSize, wallSize, colX: [], rowY: [] };
+  let x = 0;
+  for (let c = 0; c < cols; c++) { layout.colX.push(x); x += tileSize(layout, c); }
+  let y = 0;
+  for (let r = 0; r < rows; r++) { layout.rowY.push(y); y += tileSize(layout, r); }
+  layout.totalWidth = x;
+  layout.totalHeight = y;
+  return layout;
+}
 
 /* =============================================================================
  * SECTION 6 — DRAWING  (implemented in Task 11)
@@ -328,5 +370,6 @@ if (typeof module !== 'undefined' && module.exports) {
     generateMaze,
     KEY_DIRECTIONS, movePlayer,
     parseMaze, analyzeMaze, roomInside,
+    PADDING, WALL_RATIO, computeLayout, tileSize,
   };
 }
