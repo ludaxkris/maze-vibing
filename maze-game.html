@@ -21,6 +21,15 @@
     #mazeCanvas {
       border: 5px solid rgba(155,0,155,0.3);
     }
+    #controls {
+      text-align: center;
+      font: 16px sans-serif;
+      margin-bottom: 12px;
+    }
+    #controls input {
+      width: 4em;
+      margin: 0 12px 0 4px;
+    }
   </style>
 </head>
 
@@ -28,6 +37,15 @@
 
   <div id="title">Maze Game</div>
 
+  <div id="controls">
+    <p>
+      Pick a maze size in cells and press <strong>Generate</strong> for a brand-new random maze.
+      Use the arrow keys to move the blue dot in through the <strong>S</strong> gap and out through the <strong>E</strong> gap.
+    </p>
+    <label>Width <input id="mazeWidth" type="number" min="2" max="50" value="5"></label>
+    <label>Height <input id="mazeHeight" type="number" min="2" max="50" value="5"></label>
+    <button id="generateBtn" type="button">Generate</button>
+  </div>
 
   <div id="mazeContainer">
     <!-- Change the width and height below to test different canvas sizes  -->
