@@ -77,8 +77,69 @@ function makeSeededRandom(seed) {
 }
 
 /* =============================================================================
- * SECTION 3 — MAZE GENERATION  (implemented in Task 6)
- * ============================================================================= */
+ * SECTION 3 — MAZE GENERATION  ("digger with a ball of string")
+ * =============================================================================
+ * 1. Build the grid with every room open and every doorway bricked up.
+ * 2. Put the digger in the top-left room and mark it visited.
+ * 3. Repeat: look at the four neighbouring rooms.  If any is unvisited, pick
+ *    one at random, knock down the wall between, step in, and remember the way
+ *    back (the stack is the ball of string).  If none, step back one room.
+ * 4. When the stack is empty every room has been visited.  Cut the S gap in
+ *    the top wall and the E gap in the bottom wall.
+ *
+ * A wall is only ever knocked down into a room nobody has visited, so each
+ * room gets exactly one entrance: no loops, everything reachable, one solution.
+ * The S and E gaps lead outside, not to another room, so they add no loops.
+ */
+
+/**
+ * @param {number} width  - rooms across (integer >= 1)
+ * @param {number} height - rooms down  (integer >= 1)
+ * @param {() => number} [random=Math.random] - returns a number in [0, 1)
+ * @returns {string[][]} grid of (2*height+1) rows by (2*width+1) columns
+ */
+function generateMaze(width, height, random = Math.random) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+    throw new RangeError(`Maze size must be whole numbers >= 1; got ${width} x ${height}`);
+  }
+  const rows = 2 * height + 1;
+  const cols = 2 * width + 1;
+
+  // Step 1: all walls, then open every room.
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(WALL));
+  for (let r = 1; r < rows; r += 2) {
+    for (let c = 1; c < cols; c += 2) grid[r][c] = PATH;
+  }
+
+  // Step 2: the digger starts top-left.
+  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+  const stack = [[1, 1]];
+  visited[1][1] = true;
+
+  // Step 3: carve until the string is fully rewound.
+  while (stack.length > 0) {
+    const [r, c] = stack[stack.length - 1];
+    const candidates = [];
+    for (const [dRow, dCol] of STEP_DIRECTIONS) {
+      const nr = r + 2 * dRow;
+      const nc = c + 2 * dCol;
+      if (nr > 0 && nr < rows && nc > 0 && nc < cols && !visited[nr][nc]) candidates.push([nr, nc]);
+    }
+    if (candidates.length === 0) {
+      stack.pop(); // dead end: walk back along the string
+      continue;
+    }
+    const [nr, nc] = candidates[Math.floor(random() * candidates.length)];
+    grid[(r + nr) / 2][(c + nc) / 2] = PATH; // knock down the wall between the two rooms
+    visited[nr][nc] = true;
+    stack.push([nr, nc]);
+  }
+
+  // Step 4: cut the entrance and exit gaps in the outer wall.
+  grid[0][1] = START;             // above the top-left room
+  grid[rows - 1][cols - 2] = END; // below the bottom-right room
+  return grid;
+}
 
 /* =============================================================================
  * SECTION 4 — PARSING AND VALIDATION  (implemented in Task 7)
@@ -119,5 +180,6 @@ const onKeyDown = function (evt) {};
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     WALL, PATH, START, END, STEP_DIRECTIONS, mazeTiny, makeSeededRandom,
+    generateMaze,
   };
 }
