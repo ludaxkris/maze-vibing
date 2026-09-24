@@ -162,8 +162,37 @@ function generateMaze(width, height, random = Math.random) {
 const drawMaze = function (mazeData, width, height) {};
 
 /* =============================================================================
- * SECTION 7 — MOVEMENT  (movePlayer in Task 12, onKeyDown in Task 13)
- * ============================================================================= */
+ * SECTION 7 — MOVEMENT
+ * =============================================================================
+ * One key press = one room.  The grid item between two rooms is the doorway:
+ *   '*'  open: step through to the next room
+ *   '#'  wall: blocked
+ *   'S'  the entrance gap: blocked (no walking back out)
+ *   'E'  the exit gap: step into it and win
+ * The outer ring is wall everywhere else, so the player can never leave the grid.
+ */
+const KEY_DIRECTIONS = {
+  ArrowUp: [-1, 0],
+  ArrowDown: [1, 0],
+  ArrowLeft: [0, -1],
+  ArrowRight: [0, 1],
+};
+
+/**
+ * @param {string[][]} grid
+ * @param {{row:number,col:number}} position - current room
+ * @param {[number, number]} direction - [dRow, dCol]
+ * @returns {{row:number,col:number}} new position, or the same object if blocked
+ */
+function movePlayer(grid, position, direction) {
+  const [dRow, dCol] = direction;
+  const doorwayRow = grid[position.row + dRow];
+  const doorway = doorwayRow ? doorwayRow[position.col + dCol] : undefined;
+  if (doorway === END) return { row: position.row + dRow, col: position.col + dCol }; // step into the exit gap
+  if (doorway !== PATH) return position; // wall, the S gap, or off the grid
+  return { row: position.row + 2 * dRow, col: position.col + 2 * dCol };
+}
+
 /**
  * Handles keyboard arrow key input to move the player within the maze.
  *
@@ -181,5 +210,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     WALL, PATH, START, END, STEP_DIRECTIONS, mazeTiny, makeSeededRandom,
     generateMaze,
+    KEY_DIRECTIONS, movePlayer,
   };
 }
