@@ -308,8 +308,24 @@ function buildLayout(rows, cols, cellSize) {
 }
 
 /* =============================================================================
- * SECTION 6 — DRAWING  (implemented in Task 11)
- * ============================================================================= */
+ * SECTION 6 — DRAWING
+ * =============================================================================
+ * Everything that touches the canvas lives here.  `gameState` is the one piece
+ * of runtime state: the parsed maze, its pixel layout, where the player is,
+ * and whether they have won.
+ */
+const COLORS = {
+  wall: '#000000',
+  path: '#FFFFFF',
+  start: '#C8F7C5',
+  end: '#FFE8A3',
+  player: '#1E64FF',
+  text: '#000000',
+  banner: 'rgba(255,255,255,0.9)',
+};
+
+let gameState = null;
+
 /**
  * Draws the maze grid and initial player avatar onto the canvas.
  *
@@ -317,7 +333,108 @@ function buildLayout(rows, cols, cellSize) {
  * @param {number} width - The pixel width of the canvas.
  * @param {number} height - The pixel height of the canvas.
  */
-const drawMaze = function (mazeData, width, height) {};
+const drawMaze = function (mazeData, width, height) {
+  let maze;
+  try {
+    maze = parseMaze(mazeData);
+  } catch (err) {
+    gameState = null;
+    drawMessage(['Could not draw this maze:', err.message], width, height);
+    return;
+  }
+  const layout = computeLayout(maze.rows, maze.cols, width, height);
+  gameState = { maze, layout, player: { ...maze.startRoom }, won: false };
+  render(gameState);
+};
+
+function render(state) {
+  drawTiles(state);
+  drawPlayer(state);
+  if (state.won) drawBanner('You made it!', state);
+}
+
+function drawTiles({ maze, layout }) {
+  ctx.fillStyle = COLORS.path;
+  ctx.fillRect(layout.originX, layout.originY, layout.totalWidth, layout.totalHeight);
+  for (let r = 0; r < maze.rows; r++) {
+    for (let c = 0; c < maze.cols; c++) {
+      const ch = maze.grid[r][c];
+      if (ch === PATH) continue;
+      const x = layout.originX + layout.colX[c];
+      const y = layout.originY + layout.rowY[r];
+      const w = tileSize(layout, c);
+      const h = tileSize(layout, r);
+      ctx.fillStyle = ch === WALL ? COLORS.wall : ch === START ? COLORS.start : COLORS.end;
+      ctx.fillRect(x, y, w, h);
+      if (ch === START || ch === END) drawGapLabel(ch, r, c, maze, layout);
+    }
+  }
+}
+
+// Writes S or E in the padding just outside its gap in the outer wall.
+function drawGapLabel(ch, r, c, maze, layout) {
+  const x = layout.originX + layout.colX[c] + tileSize(layout, c) / 2;
+  const y = layout.originY + layout.rowY[r] + tileSize(layout, r) / 2;
+  const offset = PADDING / 2;
+  const cx = c === 0 ? x - offset : c === maze.cols - 1 ? x + offset : x;
+  const cy = r === 0 ? y - offset : r === maze.rows - 1 ? y + offset : y;
+  ctx.fillStyle = COLORS.text;
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(ch, cx, cy);
+}
+
+function drawPlayer({ layout, player }) {
+  const cx = layout.originX + layout.colX[player.col] + tileSize(layout, player.col) / 2;
+  const cy = layout.originY + layout.rowY[player.row] + tileSize(layout, player.row) / 2;
+  ctx.fillStyle = COLORS.player;
+  ctx.beginPath();
+  ctx.arc(cx, cy, layout.cellSize * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBanner(text, { layout }) {
+  const cx = layout.originX + layout.totalWidth / 2;
+  const cy = layout.originY + layout.totalHeight / 2;
+  ctx.fillStyle = COLORS.banner;
+  ctx.fillRect(cx - 150, cy - 30, 300, 60);
+  ctx.fillStyle = COLORS.text;
+  ctx.font = 'bold 28px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, cx, cy);
+}
+
+function drawMessage(lines, width, height) {
+  ctx.fillStyle = COLORS.banner;
+  ctx.fillRect(PADDING, PADDING, width - 2 * PADDING, height - 2 * PADDING);
+  ctx.fillStyle = COLORS.text;
+  ctx.font = '18px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const maxWidth = width - 4 * PADDING;
+  let y = 2 * PADDING;
+  for (const line of lines) {
+    let current = '';
+    for (const word of line.split(' ')) {
+      const trial = current ? `${current} ${word}` : word;
+      if (ctx.measureText(trial).width > maxWidth && current) {
+        ctx.fillText(current, 2 * PADDING, y);
+        y += 26;
+        current = word;
+      } else {
+        current = trial;
+      }
+    }
+    ctx.fillText(current, 2 * PADDING, y);
+    y += 34;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.mazeDebug = () => gameState; // read-only hook for acceptance tests
+}
 
 /* =============================================================================
  * SECTION 7 — MOVEMENT
