@@ -262,8 +262,37 @@ function analyzeMaze({ grid, rows, cols, startRoom }) {
 }
 
 /* =============================================================================
- * SECTION 5 — LAYOUT: grid positions -> pixels  (implemented in Task 9)
- * ============================================================================= */
+ * SECTION 5 — LAYOUT: grid positions -> pixels
+ * =============================================================================
+ * Rooms are square; walls are thinner (WALL_RATIO of a room).  colX[i] / rowY[i]
+ * give the pixel offset of grid column / row i from the maze's top-left corner,
+ * so drawing and the avatar share one piece of arithmetic.
+ */
+const PADDING = 20;      // pixels of breathing room around the maze
+const WALL_RATIO = 0.25; // wall thickness as a fraction of a room
+
+function tileSize(layout, index) {
+  return index % 2 === 0 ? layout.wallSize : layout.cellSize;
+}
+
+function computeLayout(rows, cols, width, height) {
+  const cellsWide = (cols - 1) / 2;
+  const cellsTall = (rows - 1) / 2;
+  const unitsX = cellsWide + (cellsWide + 1) * WALL_RATIO;
+  const unitsY = cellsTall + (cellsTall + 1) * WALL_RATIO;
+  const cellSize = Math.max(1, Math.floor(Math.min((width - 2 * PADDING) / unitsX, (height - 2 * PADDING) / unitsY)));
+  const wallSize = Math.max(1, Math.round(cellSize * WALL_RATIO));
+  const layout = { cellSize, wallSize, colX: [], rowY: [] };
+  let x = 0;
+  for (let c = 0; c < cols; c++) { layout.colX.push(x); x += tileSize(layout, c); }
+  let y = 0;
+  for (let r = 0; r < rows; r++) { layout.rowY.push(y); y += tileSize(layout, r); }
+  layout.totalWidth = x;
+  layout.totalHeight = y;
+  layout.originX = Math.floor((width - x) / 2);
+  layout.originY = Math.floor((height - y) / 2);
+  return layout;
+}
 
 /* =============================================================================
  * SECTION 6 — DRAWING  (implemented in Task 11)
@@ -328,5 +357,6 @@ if (typeof module !== 'undefined' && module.exports) {
     generateMaze,
     KEY_DIRECTIONS, movePlayer,
     parseMaze, analyzeMaze, roomInside,
+    PADDING, WALL_RATIO, computeLayout, tileSize,
   };
 }
