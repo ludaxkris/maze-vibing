@@ -36,7 +36,6 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T3 Test oracles | task-3-oracles | subagent (haiku) via controller | 2026-09-24 | Wave 1 |
 | T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | 2026-09-24 | Wave 1 |
 
 ## Completed
@@ -46,6 +45,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T1 Repo and GitHub | main (bootstrap) | controller session (Fable) | direct to main | 2026-09-24 |
 | T2 Agents, CLAUDE.md | task-2-agents | subagent (haiku) via controller | #2 | 2026-09-24 |
 | T5 File skeleton | task-5-skeleton | subagent (haiku) via controller | #3 | 2026-09-24 |
+| T3 Test oracles | task-3-oracles | subagent (haiku) via controller | #1 | 2026-09-24 |
 
 ## Decisions and gotchas
 
