@@ -36,7 +36,10 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| | | | | |
+| T2 Agents, CLAUDE.md | task-2-agents | subagent (haiku) via controller | 2026-09-24 | Wave 1 |
+| T3 Test oracles | task-3-oracles | subagent (haiku) via controller | 2026-09-24 | Wave 1 |
+| T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | 2026-09-24 | Wave 1 |
+| T5 File skeleton | task-5-skeleton | subagent (haiku) via controller | 2026-09-24 | Wave 1 |
 
 ## Completed
 
@@ -48,4 +51,5 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 - 2026-09-24 — S and E are gaps in the outer wall (S at row 0 col 1, E at last row col cols-2 for generated mazes). Rooms are always `*`. Confirmed by the user; spec revision 2.
 - 2026-09-24 — `candidate-submission.js` is one file with numbered sections. Parallel tasks edit different sections. The Node exports block at the bottom WILL conflict on merge; the resolution is always the union of both sides.
+- 2026-09-24 — In this session the controller (Fable) maintains memory.md claims and completions; implementer subagents push their task branch and open a PR but do not merge and do not commit to main.
 - 2026-09-24 — `pr-shots` is an orphan branch. Never merge it, never rebase it, never delete it.
