@@ -142,8 +142,124 @@ function generateMaze(width, height, random = Math.random) {
 }
 
 /* =============================================================================
- * SECTION 4 — PARSING AND VALIDATION  (implemented in Task 7)
- * ============================================================================= */
+ * SECTION 4 — PARSING AND VALIDATION
+ * =============================================================================
+ * parseMaze turns pasted maze data into a checked, normalised object.  Every
+ * error message names the row/column and says what was expected so a
+ * curriculum developer can fix a typo without reading code.
+ */
+
+/** The room just inside a gap (S or E) in the outer wall. */
+function roomInside({ row, col }, rows, cols) {
+  if (row === 0) return { row: 1, col };
+  if (row === rows - 1) return { row: rows - 2, col };
+  if (col === 0) return { row, col: 1 };
+  return { row, col: cols - 2 };
+}
+
+/**
+ * @param {Array<string|string[]>} mazeData
+ * @returns {{grid: string[][], rows: number, cols: number,
+ *            start: {row:number,col:number}, end: {row:number,col:number},
+ *            startRoom: {row:number,col:number}, endRoom: {row:number,col:number}}}
+ */
+function parseMaze(mazeData) {
+  if (!Array.isArray(mazeData)) throw new Error('Maze must be an array of rows.');
+  const grid = mazeData.map((row, r) => {
+    if (typeof row === 'string') return row.split('');
+    if (Array.isArray(row)) return row.map(String);
+    throw new Error(`Row ${r} must be an array of characters or a string.`);
+  });
+  const rows = grid.length;
+  const cols = rows > 0 ? grid[0].length : 0;
+  grid.forEach((row, r) => {
+    if (row.length !== cols) {
+      throw new Error(`Row ${r} has ${row.length} items but row 0 has ${cols}. Every row must be the same length.`);
+    }
+  });
+  if (rows < 3 || cols < 3 || rows % 2 === 0 || cols % 2 === 0) {
+    throw new Error(`Maze must have an odd number of rows and columns, at least 3 each (2*height+1 by 2*width+1). Got ${rows} x ${cols}.`);
+  }
+
+  let start = null;
+  let end = null;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const ch = grid[r][c];
+      const onEdge = r === 0 || c === 0 || r === rows - 1 || c === cols - 1;
+      const isPost = r % 2 === 0 && c % 2 === 0; // includes the four corners
+      const isRoom = r % 2 === 1 && c % 2 === 1;
+      if (isPost) {
+        if (ch !== WALL) throw new Error(`Row ${r}, column ${c} must be a wall (#) because it is a post where walls meet. Found "${ch}".`);
+      } else if (isRoom) {
+        if (ch !== PATH) throw new Error(`Row ${r}, column ${c} is a room and must be *. Found "${ch}". (S and E go in the outer wall, not in a room.)`);
+      } else if (ch === START || ch === END) {
+        if (!onEdge) throw new Error(`Row ${r}, column ${c}: ${ch} must be a gap in the outer wall, not a doorway inside the maze.`);
+        if (ch === START) {
+          if (start) throw new Error('Found more than one S. A maze needs exactly one S (entrance).');
+          start = { row: r, col: c };
+        } else {
+          if (end) throw new Error('Found more than one E. A maze needs exactly one E (exit).');
+          end = { row: r, col: c };
+        }
+      } else if (onEdge) {
+        if (ch !== WALL) throw new Error(`Row ${r}, column ${c} must be a wall (#) because it is on the outer edge; only S and E may open the outer wall. Found "${ch}".`);
+      } else if (ch !== WALL && ch !== PATH) {
+        throw new Error(`Row ${r}, column ${c} is a doorway and must be # (wall) or * (open). Found "${ch}".`);
+      }
+    }
+  }
+  if (!start) throw new Error('A maze needs exactly one S (entrance) in the outer wall. None found.');
+  if (!end) throw new Error('A maze needs exactly one E (exit) in the outer wall. None found.');
+
+  const parsed = {
+    grid, rows, cols, start, end,
+    startRoom: roomInside(start, rows, cols),
+    endRoom: roomInside(end, rows, cols),
+  };
+  const stats = analyzeMaze(parsed);
+  if (stats.reachableCount !== stats.cellCount) {
+    throw new Error(`${stats.cellCount - stats.reachableCount} room(s) cannot be reached from S. Every room must be reachable.`);
+  }
+  if (!stats.isTree) {
+    throw new Error('Maze contains a loop. There must be exactly one route between any two rooms.');
+  }
+  return parsed;
+}
+
+/**
+ * Counts rooms, open doorways, and rooms reachable from the start room.  A
+ * connected maze with exactly (rooms - 1) doorways is a tree: no loops, one
+ * route anywhere.  Only '*' doorways connect rooms; S and E lead outside.
+ */
+function analyzeMaze({ grid, rows, cols, startRoom }) {
+  const cellCount = ((rows - 1) / 2) * ((cols - 1) / 2);
+  let passageCount = 0;
+  for (let r = 1; r < rows; r += 2) {
+    for (let c = 1; c < cols; c += 2) {
+      if (c + 2 < cols && grid[r][c + 1] === PATH) passageCount++;
+      if (r + 2 < rows && grid[r + 1][c] === PATH) passageCount++;
+    }
+  }
+  const seen = Array.from({ length: rows }, () => Array(cols).fill(false));
+  const queue = [[startRoom.row, startRoom.col]];
+  seen[startRoom.row][startRoom.col] = true;
+  let reachableCount = 0;
+  while (queue.length > 0) {
+    const [r, c] = queue.shift();
+    reachableCount++;
+    for (const [dRow, dCol] of STEP_DIRECTIONS) {
+      const nr = r + 2 * dRow;
+      const nc = c + 2 * dCol;
+      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;
+      if (grid[r + dRow][c + dCol] === PATH && !seen[nr][nc]) {
+        seen[nr][nc] = true;
+        queue.push([nr, nc]);
+      }
+    }
+  }
+  return { cellCount, passageCount, reachableCount, isTree: reachableCount === cellCount && passageCount === cellCount - 1 };
+}
 
 /* =============================================================================
  * SECTION 5 — LAYOUT: grid positions -> pixels  (implemented in Task 9)
@@ -211,5 +327,6 @@ if (typeof module !== 'undefined' && module.exports) {
     WALL, PATH, START, END, STEP_DIRECTIONS, mazeTiny, makeSeededRandom,
     generateMaze,
     KEY_DIRECTIONS, movePlayer,
+    parseMaze, analyzeMaze, roomInside,
   };
 }
