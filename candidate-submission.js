@@ -473,7 +473,18 @@ function movePlayer(grid, position, direction) {
  *
  * @param {KeyboardEvent} evt - The keyboard event corresponding to the key pressed.
  */
-const onKeyDown = function (evt) {};
+const onKeyDown = function (evt) {
+  const direction = KEY_DIRECTIONS[evt.key];
+  if (!direction) return;                                   // not an arrow key
+  if (evt.target && evt.target.tagName === 'INPUT') return; // typing in a size box
+  evt.preventDefault();                                     // no page scrolling
+  if (!gameState || gameState.won) return;
+  const next = movePlayer(gameState.maze.grid, gameState.player, direction);
+  if (next === gameState.player) return;                    // blocked: nothing to redraw
+  gameState.player = next;
+  gameState.won = next.row === gameState.maze.end.row && next.col === gameState.maze.end.col;
+  render(gameState);
+};
 
 /* =============================================================================
  * SECTION 8 — EXPORTS FOR NODE TESTS
