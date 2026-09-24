@@ -9,5 +9,7 @@
     "screenshot": "node scripts/screenshot.mjs",
     "save-shots": "bash scripts/save-shots.sh"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
 }
