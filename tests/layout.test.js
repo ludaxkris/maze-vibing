@@ -26,11 +26,23 @@ test('odd indices are rooms and even indices are walls', () => {
 
 test('walls are a quarter of a room', () => {
   const L = computeLayout(11, 11, 700, 700);
-  assert.equal(L.wallSize, Math.round(L.cellSize * 0.25));
+  assert.equal(L.wallSize, Math.floor(L.cellSize * 0.25));
 });
 
 test('a wide canvas does not stretch a maze taller than the canvas allows', () => {
   const wide = computeLayout(11, 21, 1000, 400);
   assert.ok(wide.totalHeight <= 400 - 2 * PADDING);
   assert.ok(wide.totalWidth <= 1000 - 2 * PADDING);
+});
+
+test('layout never exceeds the padded canvas for any UI size on several canvases', () => {
+  for (const [w, h] of [[700, 700], [1000, 400], [400, 1000], [300, 300], [150, 150], [2000, 2000]]) {
+    for (let cells = 1; cells <= 50; cells++) {
+      for (const [rows, cols] of [[2 * cells + 1, 2 * cells + 1], [3, 2 * cells + 1], [2 * cells + 1, 3]]) {
+        const L = computeLayout(rows, cols, w, h);
+        assert.ok(L.totalWidth <= w - 2 * PADDING, `${rows}x${cols} on ${w}x${h}: width ${L.totalWidth}`);
+        assert.ok(L.totalHeight <= h - 2 * PADDING, `${rows}x${cols} on ${w}x${h}: height ${L.totalHeight}`);
+      }
+    }
+  }
 });
