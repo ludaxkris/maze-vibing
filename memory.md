@@ -27,7 +27,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 |-------|-------|--------|--------------|
 | 0 Setup | T1, T2, T3, T4, T5 | done | 2026-09-24 |
 | 1 Maze generation | T6 | done | 2026-09-24 |
-| 2 Parsing | T7, T8 | in progress (T7) | |
+| 2 Parsing | T7, T8 | in progress (T7 done) | |
 | 3 Rendering | T9, T10, T11 | in progress (T9) | |
 | 4 Movement | T12, T13 | in progress (T12 done) | |
 | 5 Harden and deploy | T14, T15 | not started | |
@@ -36,9 +36,9 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T7 parseMaze | task-7-parse | subagent (sonnet) via controller | 2026-09-24 | Wave 2 |
 | T9 computeLayout | task-9-layout | subagent (haiku) via controller | 2026-09-24 | Wave 2, PR #5 in review |
 | T10 Page controls | task-10-controls | subagent (sonnet) via controller | 2026-09-24 | Wave 3 |
+| T8 mazeTiny cross-checks | task-8-tiny | subagent (haiku) via controller | 2026-09-24 | Wave 3 |
 
 ## Completed
 
@@ -51,10 +51,12 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | #4 | 2026-09-24 |
 | T6 generateMaze | task-6-generate | subagent (sonnet) via controller | #6 | 2026-09-24 |
 | T12 movePlayer | task-12-move | subagent (haiku) via controller | #8 | 2026-09-24 |
+| T7 parseMaze | task-7-parse | subagent (sonnet) via controller | #7 | 2026-09-24 |
 
 ## Decisions and gotchas
 
 - 2026-09-24 — S and E are gaps in the outer wall (S at row 0 col 1, E at last row col cols-2 for generated mazes). Rooms are always `*`. Confirmed by the user; spec revision 2.
 - 2026-09-24 — `candidate-submission.js` is one file with numbered sections. Parallel tasks edit different sections. The Node exports block at the bottom WILL conflict on merge; the resolution is always the union of both sides.
 - 2026-09-24 — In this session the controller (Fable) maintains memory.md claims and completions; implementer subagents push their task branch and open a PR but do not merge and do not commit to main.
+- 2026-09-24 — T9 layout fix (controller ruling): `wallSize` is floored, not rounded, and `computeLayout` shrinks `cellSize` until the layout fits inside the padded canvas; a `buildLayout(rows, cols, cellSize)` helper was added in Section 5. Interface of `computeLayout`/`tileSize` unchanged.
 - 2026-09-24 — `pr-shots` is an orphan branch. Never merge it, never rebase it, never delete it.
