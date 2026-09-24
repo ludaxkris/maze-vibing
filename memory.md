@@ -25,7 +25,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Phase | Tasks | Status | Completed on |
 |-------|-------|--------|--------------|
-| 0 Setup | T1, T2, T3, T4, T5 | not started | |
+| 0 Setup | T1, T2, T3, T4, T5 | in progress (T1 done) | |
 | 1 Maze generation | T6 | not started | |
 | 2 Parsing | T7, T8 | not started | |
 | 3 Rendering | T9, T10, T11 | not started | |
@@ -42,7 +42,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Task | Branch | Who | PR | Merged on |
 |------|--------|-----|----|-----------|
-| | | | | |
+| T1 Repo and GitHub | main (bootstrap) | controller session (Fable) | direct to main | 2026-09-24 |
 
 ## Decisions and gotchas
 
