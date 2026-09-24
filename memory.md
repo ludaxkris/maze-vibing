@@ -26,20 +26,18 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | Phase | Tasks | Status | Completed on |
 |-------|-------|--------|--------------|
 | 0 Setup | T1, T2, T3, T4, T5 | done | 2026-09-24 |
-| 1 Maze generation | T6 | in progress | |
+| 1 Maze generation | T6 | done | 2026-09-24 |
 | 2 Parsing | T7, T8 | in progress (T7) | |
 | 3 Rendering | T9, T10, T11 | in progress (T9) | |
-| 4 Movement | T12, T13 | in progress (T12) | |
+| 4 Movement | T12, T13 | in progress (T12 done) | |
 | 5 Harden and deploy | T14, T15 | not started | |
 
 ## Active workstreams
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T6 generateMaze | task-6-generate | subagent (sonnet) via controller | 2026-09-24 | Wave 2 |
 | T7 parseMaze | task-7-parse | subagent (sonnet) via controller | 2026-09-24 | Wave 2 |
 | T9 computeLayout | task-9-layout | subagent (haiku) via controller | 2026-09-24 | Wave 2 |
-| T12 movePlayer | task-12-move | subagent (haiku) via controller | 2026-09-24 | Wave 2 |
 
 ## Completed
 
@@ -50,6 +48,8 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T5 File skeleton | task-5-skeleton | subagent (haiku) via controller | #3 | 2026-09-24 |
 | T3 Test oracles | task-3-oracles | subagent (haiku) via controller | #1 | 2026-09-24 |
 | T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | #4 | 2026-09-24 |
+| T6 generateMaze | task-6-generate | subagent (sonnet) via controller | #6 | 2026-09-24 |
+| T12 movePlayer | task-12-move | subagent (haiku) via controller | #8 | 2026-09-24 |
 
 ## Decisions and gotchas
 
