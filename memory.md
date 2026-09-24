@@ -28,15 +28,15 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | 0 Setup | T1, T2, T3, T4, T5 | done | 2026-09-24 |
 | 1 Maze generation | T6 | done | 2026-09-24 |
 | 2 Parsing | T7, T8 | done | 2026-09-24 |
-| 3 Rendering | T9, T10, T11 | in progress (T9, T10 done) | |
-| 4 Movement | T12, T13 | in progress (T12 done) | |
+| 3 Rendering | T9, T10, T11 | done (shots on pr-shots c3b4715) | 2026-09-24 |
+| 4 Movement | T12, T13 | in progress (T12 done, T13 running) | |
 | 5 Harden and deploy | T14, T15 | not started | |
 
 ## Active workstreams
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T11 drawMaze | task-11-draw | subagent (sonnet) via controller | 2026-09-24 | Wave 3 |
+| T13 onKeyDown + play test | task-13-keys | subagent (sonnet) via controller | 2026-09-24 | Wave 4 |
 
 ## Completed
 
@@ -53,6 +53,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T9 computeLayout | task-9-layout | subagent (haiku) via controller | #5 | 2026-09-24 |
 | T8 mazeTiny cross-checks | task-8-tiny | subagent (haiku) via controller | #10 | 2026-09-24 |
 | T10 Page controls | task-10-controls | subagent (sonnet) via controller | #9 | 2026-09-24 |
+| T11 drawMaze | task-11-draw | subagent (sonnet) via controller | #11 | 2026-09-24 |
 
 ## Decisions and gotchas
 
