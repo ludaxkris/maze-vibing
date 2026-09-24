@@ -36,7 +36,11 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | 2026-09-24 | Wave 1 |
+| T4 Screenshots, pr-shots | task-4-screenshots | subagent (sonnet) via controller | 2026-09-24 | Wave 1, PR #4 in review |
+| T6 generateMaze | task-6-generate | subagent (sonnet) via controller | 2026-09-24 | Wave 2 |
+| T7 parseMaze | task-7-parse | subagent (sonnet) via controller | 2026-09-24 | Wave 2 |
+| T9 computeLayout | task-9-layout | subagent (haiku) via controller | 2026-09-24 | Wave 2 |
+| T12 movePlayer | task-12-move | subagent (haiku) via controller | 2026-09-24 | Wave 2 |
 
 ## Completed
 
