@@ -78,3 +78,35 @@ test('drawMaze on a tiny canvas still draws without errors', async () => {
     assert.ok(s.layout.cellSize >= 1);
   });
 });
+
+test('the S label is drawn once, in the padding, and stays crisp across renders', async () => {
+  await withPage(async (page, errors) => {
+    // Sample a patch around the S label's position (originX + colX[1] + cellSize/2,
+    // originY - 10), clipped so it never dips into the maze's own tile fill -
+    // only genuine padding pixels. A single exact pixel is too fragile (a
+    // glyph like "S" has hollows), so we scan the patch for any dark
+    // (near-black) pixel, which can only be the label's ink, never a wall
+    // (outside this patch's x-range), a room, or a tinted gap fill.
+    const labelPatch = () => {
+      const L = window.mazeDebug().layout;
+      const cx = L.originX + L.colX[1] + L.cellSize / 2;
+      const cy = L.originY - 10;
+      const x0 = Math.round(cx - 12);
+      const y0 = Math.max(0, Math.round(cy - 12));
+      const h = Math.max(1, Math.min(24, L.originY - y0)); // stay above the maze bounding box
+      const data = Array.from(ctx.getImageData(x0, y0, 24, h).data);
+      const hasDarkInk = data.some((_, i) => i % 4 === 0 && data[i] < 60 && data[i + 1] < 60 && data[i + 2] < 60);
+      return { data, hasDarkInk };
+    };
+    const before = await page.evaluate(labelPatch);
+    assert.ok(before.hasDarkInk, 'expected the S label to be drawn once, in the padding above the maze');
+    // Alternate direction so every press is a genuine move into an open
+    // doorway (a real re-render), not a blocked no-op that onKeyDown skips.
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowRight');
+    const after = await page.evaluate(labelPatch);
+    assert.deepEqual(errors, []);
+    assert.deepEqual(after.data, before.data); // render() must never repaint the padding
+  });
+});
