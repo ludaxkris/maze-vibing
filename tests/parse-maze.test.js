@@ -82,6 +82,6 @@ test('rejects rows that are numbers or objects', () => {
   assert.throws(() => parseMaze(['#S###', 12345, '###E#']), /Row 1 must be an array/i);
 });
 
-test('rejects multi-character cells', () => {
+test('rejects a multi-character cell in a room slot', () => {
   assert.throws(() => parseMaze([['#','S','#'], ['#','**','#'], ['#','E','#']]), /room and must be/i);
 });

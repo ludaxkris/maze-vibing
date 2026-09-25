@@ -351,9 +351,9 @@ const drawMaze = function (mazeData, width, height) {
 function render(state) {
   drawTiles(state);
   drawPlayer(state);
-  // The winning player sits in the E gap; redraw the letters on top so the
-  // dot never hides them.
-  if (state.won) drawGapLabels(state);
+  // The winning player sits in the E gap; redraw just that letter on top so
+  // the dot never hides it (S is untouched and stays as originally drawn).
+  if (state.won) drawGapLabel(END, state.maze.end, state.maze, state.layout);
   if (state.won) drawBanner('You made it!', state);
 }
 
@@ -374,33 +374,39 @@ function drawTiles({ maze, layout }) {
   }
 }
 
-// Writes S and E once per maze in the padding just outside their gaps.
-// render() never repaints the padding, so drawing here once keeps the letters crisp.
-function drawGapLabels({ maze, layout }) {
+// Draws a single gap letter (S or E) in the padding just outside its gap.
+// Factored out of drawGapLabels so the winning frame can re-ink only the E
+// label (the one the dot can reach) instead of both.
+function drawGapLabel(ch, gap, maze, layout) {
   ctx.fillStyle = COLORS.text;
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  const centreX = layout.originX + layout.colX[gap.col] + tileSize(layout, gap.col) / 2;
+  const centreY = layout.originY + layout.rowY[gap.row] + tileSize(layout, gap.row) / 2;
+  const cx = gap.col === 0 ? layout.originX - PADDING / 2
+    : gap.col === maze.cols - 1 ? layout.originX + layout.totalWidth + PADDING / 2 : centreX;
+  const cy = gap.row === 0 ? layout.originY - PADDING / 2
+    : gap.row === maze.rows - 1 ? layout.originY + layout.totalHeight + PADDING / 2 : centreY;
+  ctx.fillText(ch, cx, cy);
+}
+
+// Writes S and E once per maze in the padding just outside their gaps.
+// render() never repaints the padding, so drawing here once keeps the letters crisp.
+function drawGapLabels({ maze, layout }) {
   for (const [ch, gap] of [[START, maze.start], [END, maze.end]]) {
-    const centreX = layout.originX + layout.colX[gap.col] + tileSize(layout, gap.col) / 2;
-    const centreY = layout.originY + layout.rowY[gap.row] + tileSize(layout, gap.row) / 2;
-    const cx = gap.col === 0 ? layout.originX - PADDING / 2
-      : gap.col === maze.cols - 1 ? layout.originX + layout.totalWidth + PADDING / 2 : centreX;
-    const cy = gap.row === 0 ? layout.originY - PADDING / 2
-      : gap.row === maze.rows - 1 ? layout.originY + layout.totalHeight + PADDING / 2 : centreY;
-    ctx.fillText(ch, cx, cy);
+    drawGapLabel(ch, gap, maze, layout);
   }
 }
 
 function drawPlayer({ layout, player }) {
   const cx = layout.originX + layout.colX[player.col] + tileSize(layout, player.col) / 2;
   const cy = layout.originY + layout.rowY[player.row] + tileSize(layout, player.row) / 2;
-  // A gap slot (even row or even col) is only wallSize wide, not cellSize; cap the
-  // radius there so the dot doesn't overrun the S/E label in the padding or clip
-  // the canvas edge when the player is standing in S or E.
+  // In a gap slot (the winning move) shrink the dot so it stays inside the canvas
+  // padding; the E label is redrawn on top in render().
   const inGap = player.row % 2 === 0 || player.col % 2 === 0;
   const radius = inGap
-    ? Math.min(layout.cellSize * 0.35, layout.wallSize / 2 + layout.cellSize * 0.15)
+    ? Math.min(layout.cellSize * 0.35, layout.wallSize / 2 + PADDING / 2)
     : layout.cellSize * 0.35;
   ctx.fillStyle = COLORS.player;
   ctx.beginPath();
