@@ -57,6 +57,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T14 Hardening | task-14-harden | subagent (sonnet) via controller | #13 | 2026-09-24 |
 | T15 Vercel config + deploy | task-15-vercel | controller session (Fable) | #15 | 2026-09-24 |
 | Process: gate agents comment on PRs | chore-pr-gate-comments | controller session (Fable) | #14 | 2026-09-24 |
+| Final-review fixes (win-state label, test hygiene, spec note) | fix-final-review | subagent (sonnet) via controller | #16 | 2026-09-24 |
 
 ## Decisions and gotchas
 
@@ -65,4 +66,5 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 - 2026-09-24 — In this session the controller (Fable) maintains memory.md claims and completions; implementer subagents push their task branch and open a PR but do not merge and do not commit to main.
 - 2026-09-24 — T9 layout fix (controller ruling): `wallSize` is floored, not rounded, and `computeLayout` shrinks `cellSize` until the layout fits inside the padded canvas; a `buildLayout(rows, cols, cellSize)` helper was added in Section 5. Interface of `computeLayout`/`tileSize` unchanged.
 - 2026-09-24 — User rule: every agent that runs on a PR posts a comment confirming it ran, before the PR is merged; the merge-gate set is defined once in `CLAUDE.md` (Workflow). Retroactive records were posted on PRs #1 to #12 (those comments start with `**Retroactive gate record**`, not the `🤖 **<agent> ...**` prefix). Post comments from a file with `--body-file`; never `--body "$(printf ...)"` or a plain `<<'EOF'` heredoc.
+- 2026-09-24 — Project complete: all 15 plan tasks plus the final whole-project review (fable) and its fix wave are merged. Open follow-ups (all minor, from PR #13/#16 reviews): drawMaze relies on drawCanvas to clear the padding; size limits duplicated between maze-game.js and the input attributes; E label is re-inked once on the win even on large mazes where the dot never reaches it; stale comment on drawGapLabels; label-test title over-promises for E.
 - 2026-09-24 — `pr-shots` is an orphan branch. Never merge it, never rebase it, never delete it.
