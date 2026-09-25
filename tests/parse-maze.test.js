@@ -77,3 +77,11 @@ for (const [name, input, pattern] of cases) {
     assert.throws(() => parseMaze(input), pattern);
   });
 }
+
+test('rejects rows that are numbers or objects', () => {
+  assert.throws(() => parseMaze(['#S###', 12345, '###E#']), /Row 1 must be an array/i);
+});
+
+test('rejects multi-character cells', () => {
+  assert.throws(() => parseMaze([['#','S','#'], ['#','**','#'], ['#','E','#']]), /single character|room and must be/i);
+});

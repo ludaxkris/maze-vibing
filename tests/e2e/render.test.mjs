@@ -57,3 +57,24 @@ test('canvas shows black walls, white rooms, tinted gaps, and a blue dot', async
     assert.deepEqual(px.player, [30, 100, 255]);
   });
 });
+
+test('an invalid pasted maze shows an error message instead of crashing', async () => {
+  await withPage(async (page, errors) => {
+    await page.evaluate(() => { drawCanvas(); drawMaze(['#S###', '#***', '###E#'], canvasWidth, canvasHeight); });
+    assert.deepEqual(errors, []);
+    assert.equal(await page.evaluate(() => window.mazeDebug()), null);
+    const px = await page.evaluate(() => Array.from(ctx.getImageData(40, 40, 1, 1).data).slice(0, 3));
+    assert.notDeepEqual(px, [0, 192, 204]); // not the bare teal background: the message box is drawn
+    await page.keyboard.press('ArrowRight'); // must not throw with gameState null
+    assert.deepEqual(errors, []);
+  });
+});
+
+test('drawMaze on a tiny canvas still draws without errors', async () => {
+  await withPage(async (page, errors) => {
+    await page.evaluate(() => { canvasWidth = 120; canvasHeight = 120; drawCanvas(); drawMaze(generateMaze(50, 50, makeSeededRandom(1)), 120, 120); });
+    assert.deepEqual(errors, []);
+    const s = await page.evaluate(() => window.mazeDebug());
+    assert.ok(s.layout.cellSize >= 1);
+  });
+});
