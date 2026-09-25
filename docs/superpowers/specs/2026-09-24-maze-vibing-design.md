@@ -270,6 +270,8 @@ existing `drawCanvas`, and calls `drawMaze`. On first load the page still draws
 
 ## 10. Repository, workflow, and agents
 
+> Note (2026-09-24): the workflow actually used is one branch and one pull request **per task**, and the merge gate is defined in one place, `CLAUDE.md` (Workflow): a `test-runner` comment reporting OPEN, a `code-reviewer` comment with no BLOCKING findings, and a `screenshot-runner` comment when visuals change. The bullets below describe the original plan.
+
 - Git repo initialised on `main`, pushed to a new **private** GitHub repo
   `maze-vibing` under the user's GitHub account. The very first commit is the untouched
   starter files so every later diff shows exactly what we added.
