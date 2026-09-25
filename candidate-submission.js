@@ -245,8 +245,8 @@ function analyzeMaze({ grid, rows, cols, startRoom }) {
   const queue = [[startRoom.row, startRoom.col]];
   seen[startRoom.row][startRoom.col] = true;
   let reachableCount = 0;
-  while (queue.length > 0) {
-    const [r, c] = queue.shift();
+  for (let head = 0; head < queue.length; head++) {
+    const [r, c] = queue[head];
     reachableCount++;
     for (const [dRow, dCol] of STEP_DIRECTIONS) {
       const nr = r + 2 * dRow;
@@ -345,6 +345,7 @@ const drawMaze = function (mazeData, width, height) {
   const layout = computeLayout(maze.rows, maze.cols, width, height);
   gameState = { maze, layout, player: { ...maze.startRoom }, won: false };
   render(gameState);
+  drawGapLabels(gameState);
 };
 
 function render(state) {
@@ -366,23 +367,26 @@ function drawTiles({ maze, layout }) {
       const h = tileSize(layout, r);
       ctx.fillStyle = ch === WALL ? COLORS.wall : ch === START ? COLORS.start : COLORS.end;
       ctx.fillRect(x, y, w, h);
-      if (ch === START || ch === END) drawGapLabel(ch, r, c, maze, layout);
     }
   }
 }
 
-// Writes S or E in the padding just outside its gap in the outer wall.
-function drawGapLabel(ch, r, c, maze, layout) {
-  const x = layout.originX + layout.colX[c] + tileSize(layout, c) / 2;
-  const y = layout.originY + layout.rowY[r] + tileSize(layout, r) / 2;
-  const offset = PADDING / 2;
-  const cx = c === 0 ? x - offset : c === maze.cols - 1 ? x + offset : x;
-  const cy = r === 0 ? y - offset : r === maze.rows - 1 ? y + offset : y;
+// Writes S and E once per maze in the padding just outside their gaps.
+// render() never repaints the padding, so drawing here once keeps the letters crisp.
+function drawGapLabels({ maze, layout }) {
   ctx.fillStyle = COLORS.text;
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(ch, cx, cy);
+  for (const [ch, gap] of [[START, maze.start], [END, maze.end]]) {
+    const centreX = layout.originX + layout.colX[gap.col] + tileSize(layout, gap.col) / 2;
+    const centreY = layout.originY + layout.rowY[gap.row] + tileSize(layout, gap.row) / 2;
+    const cx = gap.col === 0 ? layout.originX - PADDING / 2
+      : gap.col === maze.cols - 1 ? layout.originX + layout.totalWidth + PADDING / 2 : centreX;
+    const cy = gap.row === 0 ? layout.originY - PADDING / 2
+      : gap.row === maze.rows - 1 ? layout.originY + layout.totalHeight + PADDING / 2 : centreY;
+    ctx.fillText(ch, cx, cy);
+  }
 }
 
 function drawPlayer({ layout, player }) {

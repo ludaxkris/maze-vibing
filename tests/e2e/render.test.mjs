@@ -57,3 +57,46 @@ test('canvas shows black walls, white rooms, tinted gaps, and a blue dot', async
     assert.deepEqual(px.player, [30, 100, 255]);
   });
 });
+
+test('an invalid pasted maze shows an error message instead of crashing', async () => {
+  await withPage(async (page, errors) => {
+    await page.evaluate(() => { drawCanvas(); drawMaze(['#S###', '#***', '###E#'], canvasWidth, canvasHeight); });
+    assert.deepEqual(errors, []);
+    assert.equal(await page.evaluate(() => window.mazeDebug()), null);
+    const px = await page.evaluate(() => Array.from(ctx.getImageData(40, 40, 1, 1).data).slice(0, 3));
+    assert.notDeepEqual(px, [0, 192, 204]); // not the bare teal background: the message box is drawn
+    await page.keyboard.press('ArrowRight'); // must not throw with gameState null
+    assert.deepEqual(errors, []);
+  });
+});
+
+test('drawMaze on a tiny canvas still draws without errors', async () => {
+  await withPage(async (page, errors) => {
+    await page.evaluate(() => { canvasWidth = 120; canvasHeight = 120; drawCanvas(); drawMaze(generateMaze(50, 50, makeSeededRandom(1)), 120, 120); });
+    assert.deepEqual(errors, []);
+    const s = await page.evaluate(() => window.mazeDebug());
+    assert.ok(s.layout.cellSize >= 1);
+  });
+});
+
+test('S and E labels do not thicken as the player moves', async () => {
+  await withPage(async (page) => {
+    const darkCount = () => page.evaluate(() => {
+      const L = window.mazeDebug().layout;
+      const boxes = [
+        [L.originX + L.colX[1] + L.cellSize / 2 - 12, L.originY - 20, 24, 20],   // above the S gap
+        [L.originX + L.colX[5] + L.cellSize / 2 - 12, L.originY + L.totalHeight, 24, 20], // below the E gap
+      ];
+      let dark = 0;
+      for (const [x, y, w, h] of boxes) {
+        const d = ctx.getImageData(x, y, w, h).data;
+        for (let i = 0; i < d.length; i += 4) if (d[i] < 128 && d[i + 1] < 128 && d[i + 2] < 128) dark++;
+      }
+      return dark;
+    });
+    const before = await darkCount();
+    assert.ok(before > 0, 'labels are drawn in the padding');
+    for (const k of ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowDown', 'ArrowRight']) await page.keyboard.press(k);
+    assert.equal(await darkCount(), before);
+  });
+});
