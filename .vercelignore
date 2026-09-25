@@ -1,0 +1,12 @@
+node_modules
+tests
+scripts
+docs
+.claude
+.worktrees
+.superpowers
+screenshots
+CLAUDE.md
+memory.md
+package.json
+package-lock.json

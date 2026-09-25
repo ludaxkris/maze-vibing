@@ -12,6 +12,7 @@ Playable random maze on an HTML5 canvas. Started from the AoPS take-home in `REA
 - `npm run screenshot` — screenshots into `./screenshots/`
 - `npm run save-shots -- <label>` — screenshots committed to the `pr-shots` branch
 - Open `maze-game.html` in a browser to play
+- Live: https://maze-vibing.vercel.app (Vercel project `maze-vibing`, linked to this GitHub repo; production deploys from `main`)
 
 ## Where code lives
 - `candidate-submission.js` — ALL maze logic and drawing, in numbered sections. Edit here by default. Parallel tasks edit different sections; the exports block at the bottom is resolved as the union on conflict.
