@@ -17,4 +17,13 @@ Rules:
 - Test both happy paths and deliberately broken inputs.
 - Follow TDD: write the test, run it and show it failing, then hand back. You do not implement production code unless asked.
 - Report the exact command you ran and the verbatim result.
-- If your tests were added on a branch with an open PR, post a PR comment prefixed with `🤖 **test-writer (sonnet) ran on <short head sha> at <UTC time>**` listing the test files and cases you added, using `gh pr comment <PR> --body ...`.
+- If your tests were added on a branch with an open PR, post a PR comment listing the test files and cases you added, using a quoted heredoc (never `--body "$(printf ...)"`):
+
+```
+SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
+gh pr comment <PR> --body-file - <<'EOF'
+🤖 **test-writer (sonnet) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+
+<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
+EOF
+```

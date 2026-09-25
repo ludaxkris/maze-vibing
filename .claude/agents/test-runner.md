@@ -20,6 +20,17 @@ Merge gate: OPEN | CLOSED
 <verbatim output of any failure>
 ```
 
-Merge gate is OPEN only when every suite that ran passed. Never summarise a failure away; paste it.
+5. If the branch has an open PR (find it with `gh pr list --head "$(git rev-parse --abbrev-ref HEAD)"`), post the report as a PR comment using a quoted heredoc (never `--body "$(printf ...)"`, which would execute backticks in the report):
 
-5. If the branch has an open PR (`gh pr list --head <branch>`), post the report as a PR comment prefixed with `🤖 **test-runner (haiku) ran on <short head sha> at <UTC time>**`, using `gh pr comment <PR> --body ...`. A PR must not be merged without this comment.
+```
+SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
+gh pr comment <PR> --body-file - <<'EOF'
+🤖 **test-runner (haiku) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+
+<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
+EOF
+```
+
+A PR must not be merged without this comment.
+
+Merge gate is OPEN only when every suite that ran passed. Never summarise a failure away; paste it.

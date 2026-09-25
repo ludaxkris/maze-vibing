@@ -29,8 +29,10 @@ No loops. Every room reachable. Exactly one solution. Rectangular.
 
 ## Workflow
 - One branch + one PR per task (`task-N-<slug>`). Never commit code directly to `main`; only `memory.md` updates go straight to `main`.
-- Before merging: `test-runner` agent reports merge gate OPEN and `code-reviewer` agent reports no BLOCKING findings. When a PR changes anything visual, run `screenshot-runner` on it too; when a phase's last task merges, run `screenshot-runner` on `main`.
+- Before merging: `test-runner` agent reports merge gate OPEN and `code-reviewer` agent reports no BLOCKING findings. When a PR changes anything visual, run `screenshot-runner` on it too; when a phase's last task merges, run `screenshot-runner` on `main` and record the `pr-shots` folder and hash in `memory.md`'s Phase status row.
 - **Every gate agent posts its report as a comment on the PR before the merge** (prefixed `🤖 **<agent> (<model>) ran on <sha> at <time>**`). A PR with no `test-runner` and `code-reviewer` comments is not merged. Reviews done by other means (for example a plan-execution task reviewer) are posted as a comment too, saying who ran them.
 - `pr-shots` is an orphan branch checked out at `.worktrees/pr-shots`. It is never merged into `main` and never deleted.
+- `.claude/worktrees/` holds the temporary worktrees that subagents work in; it is git-ignored and never committed.
+- Gate comments must be posted with `gh pr comment <PR> --body-file - <<'EOF' ... EOF` (quoted heredoc). Never `--body "$(printf ...)"`: report text with backticks would be executed by the shell.
 - Agents: `code-reviewer` (opus), `test-writer` (sonnet), `code-architect` (fable), `test-runner` (haiku), `screenshot-runner` (haiku) in `.claude/agents/`.
 - Commit messages end with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.

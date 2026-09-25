@@ -13,6 +13,17 @@ Input: a short label for this iteration (for example `phase-3-render`) and, opti
 2. Open each PNG with the Read tool and describe what is visible: canvas present, walls black, rooms white, blue dot position, S gap (green) and E gap (gold) in the border with letters outside, controls, any error text.
 3. Compare against the expectation you were given and say MATCHES or DOES NOT MATCH with reasons.
 4. Report the folder path and the `pr-shots` commit hash.
-5. If the current branch has an open PR (`gh pr list --head <branch>`), post your report as a PR comment prefixed with `🤖 **screenshot-runner (haiku) ran on <short head sha> at <UTC time>**`, including the `pr-shots` folder path and commit hash and your MATCHES / DOES NOT MATCH verdict, using `gh pr comment <PR> --body ...`.
+5. If the current branch has an open PR (`gh pr list --head "$(git rev-parse --abbrev-ref HEAD)"`), post your report (folder path, `pr-shots` commit hash, MATCHES / DOES NOT MATCH verdict) as a PR comment using a quoted heredoc, never `--body "$(printf ...)"`:
+
+```
+SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
+gh pr comment <PR> --body-file - <<'EOF'
+🤖 **screenshot-runner (haiku) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+
+<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
+EOF
+```
+
+When run on `main` at a phase boundary there is no PR: record the folder path and `pr-shots` hash in `memory.md` (Phase status row) instead.
 
 Rules: never check out, merge, or rebase `pr-shots` into anything. Never run `git` commands on `main` other than reading. Never edit source files.

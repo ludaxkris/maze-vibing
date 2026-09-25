@@ -33,7 +33,12 @@ Report format:
 When the target is a PR number (or a branch with an open PR, found via `gh pr list --head <branch>`), post your full report as a PR comment so the merge record shows this review ran:
 
 ```
-gh pr comment <PR> --body "$(printf '🤖 **code-reviewer (opus) ran on %s at %s**\n\n%s' "$(git rev-parse --short <head-sha>)" "$(date -u +%Y-%m-%dT%H:%MZ)" "<your report>")"
+SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
+gh pr comment <PR> --body-file - <<'EOF'
+🤖 **code-reviewer (opus) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+
+<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
+EOF
 ```
 
-Include the exact head commit you reviewed. A PR must not be merged without this comment. Never edit files. If the review finds nothing, say so, give the verdict MERGEABLE, and still post the comment.
+Always use this quoted-heredoc form (`--body-file -` with `<<'EOF'`): never build the body with `--body "$(printf ...)"`, because backticks and `$(...)` inside your report would be executed by the shell. Include the exact head commit you reviewed. A PR must not be merged without this comment. Never edit files. If the review finds nothing, say so, give the verdict MERGEABLE, and still post the comment.

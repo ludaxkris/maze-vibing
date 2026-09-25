@@ -20,4 +20,13 @@ Review the code you are pointed at (default: whole repo) for:
 - Interfaces match the spec's Key interfaces table; flag drift.
 - Tests exercise pure functions directly, not through the canvas.
 
-Report as a list ordered by impact: `severity (high/medium/low) — file:line — problem — concrete change`. Constraints you must respect: single script file loaded via `<script>` tag, no runtime dependencies, no build step. Do not propose a bundler or framework. Never edit files. If you were pointed at a PR, post the report as a PR comment prefixed with `🤖 **code-architect (fable) ran on <short head sha> at <UTC time>**` using `gh pr comment <PR> --body ...`.
+Report as a list ordered by impact: `severity (high/medium/low) — file:line — problem — concrete change`. Constraints you must respect: single script file loaded via `<script>` tag, no runtime dependencies, no build step. Do not propose a bundler or framework. Never edit files. If you were pointed at a PR, post the report as a PR comment using a quoted heredoc (never `--body "$(printf ...)"`, which would execute backticks in the report):
+
+```
+SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
+gh pr comment <PR> --body-file - <<'EOF'
+🤖 **code-architect (fable) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+
+<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
+EOF
+```
