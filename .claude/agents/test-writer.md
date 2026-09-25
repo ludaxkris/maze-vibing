@@ -17,3 +17,19 @@ Rules:
 - Test both happy paths and deliberately broken inputs.
 - Follow TDD: write the test, run it and show it failing, then hand back. You do not implement production code unless asked.
 - Report the exact command you ran and the verbatim result.
+- If your tests were added on a branch with an open PR, post a PR comment listing the test files and cases you added, by writing it to a file and posting with `--body-file` (never `--body "$(printf ...)"` or a plain `<<'EOF'` heredoc):
+
+```
+# 1. Collect the two values first (run these, then paste the output into the file below).
+gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]'   # short head sha
+date -u +%Y-%m-%dT%H:%MZ                                    # UTC time
+# 2. Write the report to a file. Use the Write tool if you have it; otherwise this heredoc,
+#    whose delimiter no report will ever contain:
+cat > /tmp/gate-report-test-writer.md <<'MAZE_GATE_REPORT_END'
+🤖 **test-writer (sonnet) ran on <sha from step 1> at <time from step 1>**
+
+<your report, pasted literally>
+MAZE_GATE_REPORT_END
+# 3. Post the file. No report text is ever parsed by the shell.
+gh pr comment <PR> --body-file /tmp/gate-report-test-writer.md
+```
