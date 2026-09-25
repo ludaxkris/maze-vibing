@@ -28,4 +28,12 @@ Report format:
 - file:line — suggestion
 ```
 
-Never edit files. If the review finds nothing, say so and give the verdict MERGEABLE.
+## Post your report on the PR (required before any merge)
+
+When the target is a PR number (or a branch with an open PR, found via `gh pr list --head <branch>`), post your full report as a PR comment so the merge record shows this review ran:
+
+```
+gh pr comment <PR> --body "$(printf '🤖 **code-reviewer (opus) ran on %s at %s**\n\n%s' "$(git rev-parse --short <head-sha>)" "$(date -u +%Y-%m-%dT%H:%MZ)" "<your report>")"
+```
+
+Include the exact head commit you reviewed. A PR must not be merged without this comment. Never edit files. If the review finds nothing, say so, give the verdict MERGEABLE, and still post the comment.

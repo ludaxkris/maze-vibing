@@ -21,3 +21,5 @@ Merge gate: OPEN | CLOSED
 ```
 
 Merge gate is OPEN only when every suite that ran passed. Never summarise a failure away; paste it.
+
+5. If the branch has an open PR (`gh pr list --head <branch>`), post the report as a PR comment prefixed with `🤖 **test-runner (haiku) ran on <short head sha> at <UTC time>**`, using `gh pr comment <PR> --body ...`. A PR must not be merged without this comment.

@@ -17,3 +17,4 @@ Rules:
 - Test both happy paths and deliberately broken inputs.
 - Follow TDD: write the test, run it and show it failing, then hand back. You do not implement production code unless asked.
 - Report the exact command you ran and the verbatim result.
+- If your tests were added on a branch with an open PR, post a PR comment prefixed with `🤖 **test-writer (sonnet) ran on <short head sha> at <UTC time>**` listing the test files and cases you added, using `gh pr comment <PR> --body ...`.
