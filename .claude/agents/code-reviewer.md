@@ -33,12 +33,18 @@ Report format:
 When the target is a PR number (or a branch with an open PR, found via `gh pr list --head <branch>`), post your full report as a PR comment so the merge record shows this review ran:
 
 ```
-SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
-gh pr comment <PR> --body-file - <<'EOF'
-🤖 **code-reviewer (opus) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+# 1. Collect the two values first (run these, then paste the output into the file below).
+gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]'   # short head sha
+date -u +%Y-%m-%dT%H:%MZ                                    # UTC time
+# 2. Write the report to a file. Use the Write tool if you have it; otherwise this heredoc,
+#    whose delimiter no report will ever contain:
+cat > /tmp/gate-report-code-reviewer.md <<'MAZE_GATE_REPORT_END'
+🤖 **code-reviewer (opus) ran on <sha from step 1> at <time from step 1>**
 
-<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
-EOF
+<your report, pasted literally>
+MAZE_GATE_REPORT_END
+# 3. Post the file. No report text is ever parsed by the shell.
+gh pr comment <PR> --body-file /tmp/gate-report-code-reviewer.md
 ```
 
-Always use this quoted-heredoc form (`--body-file -` with `<<'EOF'`): never build the body with `--body "$(printf ...)"`, because backticks and `$(...)` inside your report would be executed by the shell. Include the exact head commit you reviewed. A PR must not be merged without this comment. Never edit files. If the review finds nothing, say so, give the verdict MERGEABLE, and still post the comment.
+Always post from a file (`--body-file <path>`): never build the body with `--body "$(printf ...)"` or a plain `<<'EOF'` heredoc, because report text containing backticks, `$(...)`, or a bare `EOF` line would be parsed by the shell. Include the exact head commit you reviewed. A PR must not be merged without this comment. Never edit files. If the review finds nothing, say so, give the verdict MERGEABLE, and still post the comment.

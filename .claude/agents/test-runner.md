@@ -20,15 +20,21 @@ Merge gate: OPEN | CLOSED
 <verbatim output of any failure>
 ```
 
-5. If the branch has an open PR (find it with `gh pr list --head "$(git rev-parse --abbrev-ref HEAD)"`), post the report as a PR comment using a quoted heredoc (never `--body "$(printf ...)"`, which would execute backticks in the report):
+5. If the branch has an open PR (find it with `gh pr list --head "$(git rev-parse --abbrev-ref HEAD)"`), post the report as a PR comment by writing it to a file and posting with `--body-file` (never `--body "$(printf ...)"` or a plain `<<'EOF'` heredoc: report text would be parsed by the shell):
 
 ```
-SHA=$(gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]')
-gh pr comment <PR> --body-file - <<'EOF'
-🤖 **test-runner (haiku) ran on <paste $SHA> at <paste UTC time from: date -u +%Y-%m-%dT%H:%MZ>**
+# 1. Collect the two values first (run these, then paste the output into the file below).
+gh pr view <PR> --json headRefOid -q '.headRefOid[0:7]'   # short head sha
+date -u +%Y-%m-%dT%H:%MZ                                    # UTC time
+# 2. Write the report to a file. Use the Write tool if you have it; otherwise this heredoc,
+#    whose delimiter no report will ever contain:
+cat > /tmp/gate-report-test-runner.md <<'MAZE_GATE_REPORT_END'
+🤖 **test-runner (haiku) ran on <sha from step 1> at <time from step 1>**
 
-<your report, pasted literally; backticks and $() are safe inside this quoted heredoc>
-EOF
+<your report, pasted literally>
+MAZE_GATE_REPORT_END
+# 3. Post the file. No report text is ever parsed by the shell.
+gh pr comment <PR> --body-file /tmp/gate-report-test-runner.md
 ```
 
 A PR must not be merged without this comment.
