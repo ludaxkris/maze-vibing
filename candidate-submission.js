@@ -351,6 +351,9 @@ const drawMaze = function (mazeData, width, height) {
 function render(state) {
   drawTiles(state);
   drawPlayer(state);
+  // The winning player sits in the E gap; redraw the letters on top so the
+  // dot never hides them.
+  if (state.won) drawGapLabels(state);
   if (state.won) drawBanner('You made it!', state);
 }
 
@@ -392,9 +395,16 @@ function drawGapLabels({ maze, layout }) {
 function drawPlayer({ layout, player }) {
   const cx = layout.originX + layout.colX[player.col] + tileSize(layout, player.col) / 2;
   const cy = layout.originY + layout.rowY[player.row] + tileSize(layout, player.row) / 2;
+  // A gap slot (even row or even col) is only wallSize wide, not cellSize; cap the
+  // radius there so the dot doesn't overrun the S/E label in the padding or clip
+  // the canvas edge when the player is standing in S or E.
+  const inGap = player.row % 2 === 0 || player.col % 2 === 0;
+  const radius = inGap
+    ? Math.min(layout.cellSize * 0.35, layout.wallSize / 2 + layout.cellSize * 0.15)
+    : layout.cellSize * 0.35;
   ctx.fillStyle = COLORS.player;
   ctx.beginPath();
-  ctx.arc(cx, cy, layout.cellSize * 0.35, 0, Math.PI * 2);
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
 }
 

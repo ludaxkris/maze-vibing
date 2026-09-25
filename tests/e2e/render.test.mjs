@@ -84,13 +84,15 @@ test('S and E labels do not thicken as the player moves', async () => {
     const darkCount = () => page.evaluate(() => {
       const L = window.mazeDebug().layout;
       const boxes = [
-        [L.originX + L.colX[1] + L.cellSize / 2 - 12, L.originY - 20, 24, 20],   // above the S gap
-        [L.originX + L.colX[5] + L.cellSize / 2 - 12, L.originY + L.totalHeight, 24, 20], // below the E gap
+        [L.originX + L.colX[1] + L.cellSize / 2 - 12, L.originY - 19, 24, 18],   // above the S gap
+        [L.originX + L.colX[5] + L.cellSize / 2 - 12, L.originY + L.totalHeight + 1, 24, 18], // below the E gap
       ];
       let dark = 0;
       for (const [x, y, w, h] of boxes) {
         const d = ctx.getImageData(x, y, w, h).data;
-        for (let i = 0; i < d.length; i += 4) if (d[i] < 128 && d[i + 1] < 128 && d[i + 2] < 128) dark++;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i] < 128 && d[i + 1] < 128 && d[i + 2] < 128 && d[i + 3] === 255) dark++;
+        }
       }
       return dark;
     });
@@ -98,5 +100,18 @@ test('S and E labels do not thicken as the player moves', async () => {
     assert.ok(before > 0, 'labels are drawn in the padding');
     for (const k of ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowDown', 'ArrowRight']) await page.keyboard.press(k);
     assert.equal(await darkCount(), before);
+    // Winning move for mazeTiny: lands the player on { row: 6, col: 5 }, the E gap.
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowDown');
+    assert.equal((await page.evaluate(() => window.mazeDebug())).won, true);
+    // The dot is blue (30,100,255), not dark, so if the E letter were hidden
+    // behind it, the dark-pixel count in these boxes would drop sharply (the
+    // pre-fix radius covered it almost entirely). render() redrawing the gap
+    // labels on top of the dot can only add ink relative to `before` (canvas
+    // fillText composites over whatever is already there, so re-stroking the
+    // same glyph a second time can only darken already-drawn anti-aliased
+    // edge pixels, never lighten them) — so a correct fix never drops below
+    // `before`, while the old bug (dot swallowing the E) would.
+    assert.ok(await darkCount() >= before, 'the E letter is still fully visible over the dot');
   });
 });

@@ -83,5 +83,5 @@ test('rejects rows that are numbers or objects', () => {
 });
 
 test('rejects multi-character cells', () => {
-  assert.throws(() => parseMaze([['#','S','#'], ['#','**','#'], ['#','E','#']]), /single character|room and must be/i);
+  assert.throws(() => parseMaze([['#','S','#'], ['#','**','#'], ['#','E','#']]), /room and must be/i);
 });
