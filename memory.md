@@ -30,13 +30,13 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | 2 Parsing | T7, T8 | done | 2026-09-24 |
 | 3 Rendering | T9, T10, T11 | done (shots on pr-shots c3b4715) | 2026-09-24 |
 | 4 Movement | T12, T13 | done | 2026-09-24 |
-| 5 Harden and deploy | T14, T15 | in progress (T14) | |
+| 5 Harden and deploy | T14, T15 | in progress (T14 done, shots on pr-shots da9e244) | |
 
 ## Active workstreams
 
 | Task | Branch | Who (agent/session) | Started | Notes |
 |------|--------|---------------------|---------|-------|
-| T14 Hardening | task-14-harden | subagent (sonnet) via controller | 2026-09-24 | Wave 5; architect review run by controller in parallel |
+| T15 Vercel config + deploy | task-15-vercel | controller session (Fable) | 2026-09-24 | Wave 5; deploy via Vercel MCP |
 
 ## Completed
 
@@ -55,6 +55,7 @@ Spec: `docs/superpowers/specs/2026-09-24-maze-vibing-design.md`.
 | T10 Page controls | task-10-controls | subagent (sonnet) via controller | #9 | 2026-09-24 |
 | T11 drawMaze | task-11-draw | subagent (sonnet) via controller | #11 | 2026-09-24 |
 | T13 onKeyDown + play test | task-13-keys | subagent (sonnet) via controller | #12 | 2026-09-24 |
+| T14 Hardening | task-14-harden | subagent (sonnet) via controller | #13 | 2026-09-24 |
 
 ## Decisions and gotchas
 
